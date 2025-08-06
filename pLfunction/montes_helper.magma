@@ -1,0 +1,67 @@
+
+//Crazy work-around here needed because Montes package requires number fields
+//to be defined by monic integral polynomials, but magma does not realize
+//that K has this property.  So we force the issue.
+function Montify(K)
+	if Degree(K) eq 1 then
+		return RationalsAsNumberField();
+	else
+		alpha := K.1;
+		f:=DefiningPolynomial(K);
+		Zx<X>:=PolynomialRing(Integers());
+		L:=NumberField(Zx!f);
+		Embed(K,L,L.1);
+
+		return L;
+	end if;
+end function;
+
+//Returns the primes over p in L (a Montes field)
+function PrimesOver(L,p:verbose:=false)
+	Montes(L,p);
+	pps:=L`PrimeIdeals[p];
+
+	return pps;
+end function;
+
+function PrimeBelow(pp)
+	return Characteristic(ResidueField(pp));
+end function;
+
+
+function ram_degree(pp)
+	return pp`e;
+end function;
+
+function inertia_degree(pp)
+	return pp`f;
+end function;
+
+// Example of generator() function (must attach montes.m and +Ideals.m)
+// p:=13;
+// Zx := PolynomialRing(Integers()); 
+// f := X^5 + X^3 + X^2 - 2;
+// L<u>:=NumberField(Zx!f);
+// pps:=PrimesOver(L,p);
+// generator(pps[1]);
+
+function generator(pp)
+	TwoElement(~pp);
+	return pp`Generator;
+end function;
+
+function valuation(alpha,pp)
+	a := PValuation(alpha,pp);
+	if a eq Infinity() then
+		a := 100000;
+	end if;
+	return a;
+end function;
+
+function abs_valuation(alpha,pp)
+	a := PValuation(alpha,pp);
+	if a eq Infinity() then
+		a := 100000;
+	end if;
+	return a/ram_degree(pp);
+end function;
